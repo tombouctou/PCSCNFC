@@ -100,7 +100,14 @@ int main(void)
         dwReaders = SCARD_AUTOALLOCATE;
 
         rv = SCardListReaders(hContext, NULL, (LPTSTR)&mszReaders, &dwReaders);
-        CHECKRV("SCardListReaders1", rv);
+        //CHECKRV("SCardListReaders1", rv);
+        if (SCARD_E_INVALID_HANDLE == rv) {
+			sleep(1);
+            continue;
+        } else if (SCARD_E_INSUFFICIENT_BUFFER == rv) {
+            fprintf(stderr, "%s\n", "scard: insufficient buffer");
+            break;
+        }
 
         rgReaderStates[0].szReader = &mszReaders[0];
         rgReaderStates[0].dwCurrentState = SCARD_STATE_EMPTY;
@@ -174,7 +181,8 @@ int main(void)
         CHECKRV("SCardFreeMemory", rv);
 
         rv = SCardReleaseContext(hContext);
-        CHECKRV("SCardReleaseContext", rv);
+        // always release context freely
+        //CHECKRV("SCardReleaseContext", rv);
 
         hContext = 0;
 /*
